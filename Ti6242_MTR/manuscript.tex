@@ -1,0 +1,863 @@
+\documentclass[review]{elsarticle}
+\usepackage[margin=2.5cm]{geometry}
+
+% disable word break with hyphenation
+\tolerance=1
+\emergencystretch=\maxdimen
+\hyphenpenalty=10000
+\hbadness=10000
+
+\usepackage{amsmath,bm}
+\usepackage{graphicx}
+\usepackage{lineno,hyperref}
+\usepackage{multirow}
+\modulolinenumbers[5]
+\usepackage{color}
+%\definecolor{r}{rgb}{1,0,0}
+
+\journal{International Journal of Plasticity}
+
+%%%%%%%%%%%%%%%%%%%%%%%
+%% Harvard
+\bibliographystyle{model2-names}\biboptions{authoryear}
+%% APA style
+%%\bibliographystyle{model5-names}\biboptions{authoryear}
+%% `Elsevier LaTeX' style
+%%\bibliographystyle{elsarticle-num}
+%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\begin{frontmatter}
+
+%\title{Crystal plasticity based investigation on the breakdown of macrozones during post-globularization processing in Ti-6242}
+\title{Modeling the evolution of microtextured regions during $\alpha/\beta$ processing using the crystal plasticity finite element method}
+%
+% author information
+%
+\author[UTK]{Ran Ma}
+\author[AFL]{Adam L. Pilchak}
+\author[AFL]{S. Lee Semiatin}
+\author[UTK]{Timothy J. Truster\corref{cAuthor}}
+\cortext[cAuthor]{Assistant Professor. Corresponding author: Ph: (865) 974-1913; Fax: (865) 974-2669}
+\ead{ttruster@utk.edu}
+\address[UTK]{Department of Civil and Environmental Engineering, University of Tennessee, Knoxville TN 37996, United States}
+\address[AFL]{Air Force Research Laboratory, Materials and Manufacturing Directorate, AFRL/RXCM, Wright-Patterson AFB, OH 45433, United States}
+%
+% abstract
+%
+\begin{abstract}
+Titanium alloy Ti-6242 (Ti-6Al-2Sn-4Zr-2Mo) is frequently used in the high-pressure compressor of aero engines.
+While exhibiting high strength at elevated temperatures, it is susceptible to dwell fatigue at temperatures below $\sim 473$ K due in part to the presence of microtextured regions (MTRs), also known as macrozones.
+This work investigates the role of forging direction on the mesoscale mechanical response of MTRs.
+The crystal plasticity finite element (CPFE) method was used to simulate large strain compression of MTRs with different initial crystallographic and morphological orientation with respect to the axial direction of the extruded billet.
+These simulations included cases where the $c$-axis of neighboring MTRs were (i) both perpendicular, (ii) one at $45^{\circ}$ and one perpendicular, and (iii) one parallel and one perpendicular, to the compression direction.
+The effectiveness of each processing direction on the breakdown of MTRs is inferred through the extent of lattice rotation and the development of internal misorientations within the MTRs.
+The calculations reveal that case (i) leads to the most effective MTR breakdown but the $c$-axis remains similarly aligned; the $c$-axis is more scattered in case (iii) but the extent is limited by the high critical resolved shear stress of the pyramidal slip systems.
+Under uniaxial compression, competitive slip system activity correlates with positive divergence of reorientation velocity field in Rodrigues' space as well as efficient breakdown of MTR.
+\end{abstract}
+
+\begin{keyword}
+\texttt{microstructures (A)}\sep 
+\texttt{crystal plasticity (B)}\sep 
+\texttt{finite strain (B)}\sep 
+\texttt{finite elements (C)}\sep 
+\texttt{microtextured region}
+% \MSC[2010] 00-01\sep  99-00
+\end{keyword}
+
+\end{frontmatter}
+
+\linenumbers
+
+\section{Introduction}
+The titanium alloy Ti-6242 (Ti-6Al-2Sn-4Zr-2Mo) has been the structural material of choice for use in high-pressure compressors for gas turbine engines of aircraft (\cite{r2}) due to its high strength-to-weight ratio and excellent mechanical properties.
+Jet engine efficiency is highly correlated to operating temperature, and Ti-6242 has demonstrated excellent creep and fatigue resistance at high temperatures up to 873 K.
+While the near $\alpha$ alloy Ti-6242 was developed for high temperature applications, its microstructural characteristics have an impact on low temperature fatigue resistance (\cite{r3}).
+The degraded dwell fatigue strength has been linked to the presence of microtextured regions (MTRs, also known as macrozones), which are formed during the secondary $\alpha/\beta$ hot working.
+This secondary $\alpha/\beta$ hot working is imposed to spheroidize the $\alpha$ colonies as well as to produce a microstructure of fine equiaxed $\alpha _p$ particles.
+However, the processed material may still contain large clusters ($\sim$1 mm) of primary $\alpha_p$ particles and secondary $\alpha_s$ colonies with similar $c$-axis orientations.
+For example, Figure \ref{fig:2} (c) shows a typical microstructure of the billet material after $\alpha/\beta$ processing (\cite{r5}).
+While the $\alpha _p$ particles are refined in size, several groups can be found of similarly oriented $\alpha _p$ particles in close proximity.
+Faceted initiation sites with sizes and shapes commensurate with those of the MTRs in the material are routinely observed on fracture surfaces formed by dwell fatigue loading.
+These facets typically form in so-called ``hard'' MTRs which have their $c$-axis nearly parallel to the loading direction (e.g. within $10^{\circ}$), and crack growth occurs over an order of magnitude faster in these orientations leading to the formation of physically large defects in a small number of cycles (\cite{r3,r4}).
+The size of MTRs depends significantly on prior processing steps (\cite{r5}), but are typically in the range of 0.1 mm to $\sim$1 mm for well processed material and several millimeters larger for poorly processed material.
+Therefore, it is necessary to reduce the prevalence of MTRs in order to improve the dwell fatigue behavior of Ti-6242.
+
+% formation of MTR
+Because the final microstructure is a strong function of all prior processing steps, a deep understanding of the complete thermomechanical processing sequence for $\alpha + \beta$ titanium alloys and the operative mechanisms for globularization is crucial for developing processing routes to reduce or suppress the appearance of MTRs.
+There have been numerous investigations that have provided a mechanism-based understanding of microtexture formation, but quantitative treatments remain limited (\cite{Venkatesh2016}).
+Early work by \cite{Weiss1986} revealed that low angle dislocation walls would develop within individual $\alpha$ lamellae during deformation.
+The $\beta$ phase would penetrate these walls during subsequent static annealing in an attempt to balance interfacial energy, but this process does not induce any additional lattice rotation.
+Hence the resulting microstructure appears \textit{morphologically} equiaxed and recrystallized, but electron backscatter diffraction (EBSD) analyses reveal that these grains remain similarly oriented (\cite{r9,r10,r11,r12}).
+\cite{r6} were the first to highlight the importance of MTRs and draw the correlation between the size of prior $\alpha$ colonies and the resulting MTR size after deformation.
+Later, \cite{r13} provided a mechanism-based understanding explaining why some colonies randomize during deformation while others persist.
+Recently, it was found that two $\alpha$ colonies from different prior $\beta$ grains might have the same orientation, resulting in larger effective MTR size than prior $\alpha$ lamellae during the following heat treatment (\cite{r9}).
+
+% breakdown of MTR
+While static heat treatment cannot randomize the microstructure, strategies may be employed to solution heat treat at a temperature where the volume fraction of $\alpha$ is low enough such that discrete $\alpha _p$ particles are separated by at least a particle distance, on average.
+Cooling from this temperature at moderately fast rates will produce a fine, basket-weave microstructure in the secondary alpha phase to breakup the continuity of orientation.
+Nevertheless, there are a number of microstructural arrangements that still intensify microtexture despite this heat treatment:
+(1) the persistence of Burgers orientation relationship (BOR) between $\alpha _p$ particles and $\beta$ matrix even at severe deformation (\cite{r9,r10,r11}),
+(2) the variant selection of inherited $\alpha _s$ phase affected by existing $\alpha _p$ phase (\cite{r9,r11,r12}),
+(3) limited texture components of deformed $\alpha _p$ particles (\cite{r9}), and
+(4) dynamic recrystallization (DRX) within both primary $\alpha$ lamellae and $\beta$ layers where new grains usually have an orientation similar to the parent grains (\cite{r11,r13}).
+Additional $\alpha/\beta$ processing proves to be effective in breaking down MTRs (\cite{r14}).
+The forging sequence of this additional processing should be chosen carefully to achieve an optimum breakdown efficiency (\cite{r13}).
+
+Considering the extensive experimental work required to optimize the breakdown processing, numerical simulation should be included in designing forging sequences for breakdown of MTRs.
+However, simulating the $\alpha /\beta$ processing remains a challenge especially when prediction of microtexture is required.
+In addition to the plastic anisotropy and multi-scale microstructure of near $\alpha$ and $\alpha + \beta$ titanium alloys, modeling high temperature deformation of these alloys is further complicated by the occurrence of significant amounts of flow softening.
+The following studies have addressed this issue for single phase and two-phase titanium.
+Macroscopic phenomenological models prove to be effective in predicting the strong anisotropic plastic behavior of titanium alloys under non-proportional loading (\cite{Khan-multiaxial,Khan-ti6al4v}).
+Such models also correlate well with the post-yield behavior of ultrafine-grained titanium (\cite{Khan-nanocrystalline}).
+However, in order to investigate the microtexture evolution at high temperature and large strains, crystal plasticity based modeling is required, where strain-aging effect (\cite{McDowell-TiCPFE}), recrystallization (\cite{Yang-VPSC}) and microstructure based modeling (\cite{Ghosh-TiCPFE}) can be incorporated.
+\cite{r15} explicitly simulated dynamic recrystallization (DRX) of TA15 alloy compressed in $\beta$ regime by combining crystal plasticity finite element (CPFE) method and 3D cellular automata.
+\cite{r16} proposed a continuum scale physics-based model which can capture the mechanical response of Ti-6Al-4V at a large range of strain rate and temperature.
+\cite{r17} utilized a crystal plasticity based Mechanical Threshold Stress (MTS) model and a viscoplasticity self-consistent (VPSC) method to simulate the mechanical response of Ti-5553 both below and above the $\beta$ transus and at different loading rates.
+Till now, only limited investigation has been done on modeling the microtexture evolution during thermomechanical processing.
+For example, \cite{Miller2016} used the viscoplastic self-consistent (VPSC) method to investigate the role of microtexture on macrotexture evolution in Ti-6Al-4V at room temperature.
+Thus, the relationship between MTR evolution and $\alpha/\beta$ processing sequence still remains unclear.
+
+The current research serves as the first attempt to use the CPFE method to investigate the effect of compression direction on the efficiency of MTR breakdown.
+Herein, numerical analyses are carefully designed to complement the earlier experimental work from \cite{r5,r26}.
+The primary modeling assumption is that, the texture evolution of Ti-6242 deforming at 1172 K is mainly controlled by slip-based deformation of $\alpha _p$ particles.
+Therefore, single-phase $\alpha$ is considered in the current simulations.
+Key emphasis is placed on investigating the evolution of lattice rotation and the development of crystallographic misorientations within each MTR.
+To account for plastic anisotropy and unequal slip resistance, a stress update framework was developed, incorporating the Green-Naghdi stress rate along the lines of \cite{r22}.
+This framework is general for implementing a wide class of crystal plasticity constitutive models with multi-hardening variables by isolating the specific model dependent terms in the stress update equations.
+The crystal plasticity constitutive model used in \cite{r18} was extended to account for the effects of flow-softening and stress relaxation.
+Macroscopic stress-strain curves for Ti-6242 under compression at 1172 K and constant strain rate were used for calibrating the constitutive parameters (\cite{r26}).
+Subsequently, idealized microstructures were generated to capture key features from the billet textures in \cite{r5}.
+Typical extrusion processing leads to high-aspect-ratio MTR often having $\left< 10\bar{1}0 \right>$ parallel to the billet extrusion axis.
+To gain understanding of the thermomechanical processing (TMP) parameters that reduce MTR size, \cite{r26} performed hot-compression tests at 1172 K on specimens cored from the same billet.
+The compression directions were $0^{\circ}$, $45^{\circ}$ and $90^{\circ}$ with respect to the extrusion axis.
+To approximate these tests, highly-resolved finite element models of paired MTRs embedded in a random-textured $\alpha$ matrix were subjected to compression in these same directions to gain a deeper understanding of the MTR breakdown process.
+Evolution of lattice rotation and misorientation distribution within the MTRs were analyzed in detail and compared with results of rotational velocity divergence to quantify orientation stability.
+
+The paper is organized as follows:
+In Section \ref{simulation}, the numerical modeling approach is introduced in detail, including the extended crystal plasticity constitutive model, proposed stress update algorithm, material parameter calibration and CPFE microstructure description.
+In Section \ref{results}, critical results are presented, with an emphasis on the slip system activity, lattice rotation and misorientation distribution.
+Additional discussion is contained in Section \ref{discussion}, followed by concluding remarks in Section \ref{conclusion}.
+
+\section{Modeling and simulation approach}
+\label{simulation}
+The material studied is the near alpha titanium alloy Ti-6242 (Ti-6Al-2Sn-4Zr-2Mo).
+Flow softening is a well-known phenomenon for Ti-6242 when deformed above 973 K, which is mainly caused by:
+(1) Deformation induced heating with an adiabatic temperature increase, especially when forging at low temperatures and high strain rate (\cite{softOverview});
+(2) Breakdown of coarse-grain lamellar, such as $\alpha$ lamellae spheroidization (\cite{softOverview});
+(3) Slip transfer across $\alpha/\beta$ interfaces such that grain refinement strengthening and Hall-Petch effect are neutralized (\cite{softSlip}).
+To capture this softening response due to elevated temperature, a constitutive model for Ti-6242 developed in \cite{r18} was extended and implemented into the crystal plasticity finite element model of the Warp3d code (\cite{r21}).
+The stress update algorithm in Warp3d includes specific features; for example, the Green-Naghdi stress rate is adopted in the presence of finite rotations for the hypoelastic description of material response.
+These features are essential for modeling MTR evolution, which requires large deformation and lattice rotation.
+However, the previous CPFE implementation in Warp3d used identical hardening for all slip systems (\cite{r22,r23}), limiting the incorporation of newer CP models.
+In the current research, we extended this CPFE implementation to slip-system-dependent hardening and material parameters, which is required for accommodating the dissimilar slip system resistance exhibited by Ti-6242 $\alpha$ phase.
+Another feature of our implementation is that the tangent stiffness is formulated such that most existing CP models can be incorporated into this framework conveniently.
+	\subsection{Crystal plasticity based constitutive law with updated lattice rotation}
+	A brief discussion of the relevant kinematic assumptions for the implementation of crystal plasticity in the finite element program Warp3d (\cite{r21}) is given below.
+	Further details are contained in (\cite{r22}).
+	
+	The particular objective stress rate employed is the Green-Naghdi rate, $\check{\bm{\sigma}}$, expressed in terms of the spin tensor $\mathbf{\Omega}$ as follows:
+	\begin{equation}
+	\check{\bm{\sigma}} = \dot{\bm{\sigma}} + \bm{\sigma\Omega} - \bm{\Omega\sigma}
+	\label{eq:GNrate}
+	\end{equation}
+	where $\bm{\sigma}$ is the Cauchy stress tensor, and the spin tensor $\mathbf{\Omega=\dot{R}R}^T$ is defined in terms of the rotation tensor \textbf{R} from the polar decomposition of the deformation gradient $\mathbf{F=RU}$.
+	A primary advantage of the Green-Naghdi rate is that employing a constant elastic material moduli tensor induces minimal impact on the quality of the computed response at large rotations.
+	
+	Within crystal plasticity theory, the motion of dislocations on particular crystallographic slip systems characterizes the plastic deformation, and strain compatibility is restored locally through lattice elastic deformation.
+	The multiplicative split of the deformation gradient \textbf{F} into elastic and plastic parts expresses this deformation mode through continuum kinematics:
+	\begin{equation}
+	\label{eq:decomp}
+	\mathbf{F} = \mathbf{F}^e \mathbf{F}^p \approx \left( \mathbf{I}+\bm{\varepsilon} \right) \mathbf{R}^e \mathbf{R}^p \mathbf{U}^p
+	\end{equation}
+	where the additional assumption of small elastic strains $\bm{\varepsilon} \ll \mathbf{I}$ is employed to simplify the resulting formulation.
+	
+	The stress-strain relation obtained from (\ref{eq:GNrate}) and (\ref{eq:decomp}) invokes the unrotated Cauchy stress \textbf{t} and its work conjugate deformation rate \textbf{d} in the intermediate configuration as:
+	% equation 1
+	\begin{equation}
+	\dot{\mathbf{t}}=\mathbf{C}_0:\left(\mathbf{d}-\bar{\mathbf{d}}^p\right) + \mathbf{R\bar{w}}^p\mathbf{R}^T\mathbf{t} - \mathbf{tR\bar{w}}^p\mathbf{R}^T 
+	\label{eq:1}
+	\end{equation}
+	in which $\mathbf{t = R}^T \bm{\sigma}\mathbf{R}$ is the unrotated Cauchy stress and $\mathbf{d} = \frac{1}{2} \mathbf{\left( \dot{U}U^{-1} + U^{-1}\dot{U} \right)}$ is the unrotated rate of deformation.
+	The plastic deformation rate $\bar{\mathbf{d}}^p$ and plastic vorticity $\bar{\mathbf{w}}^p$ are defined subsequently through constitutive relations in terms of the corotational plastic velocity gradient $\bar{\mathbf{l}}^p$.
+	In the numerical implementation, the backward Euler time integration scheme is applied to evolve equation (\ref{eq:1}), and the nodal displacements and applied incremental strains are directly employed to compute \textbf{F} and \textbf{d} at the element level.
+	Further details of the derivation and implementation are provided in \cite{r22}.
+	In particular, the additional stress and rotation terms in (\ref{eq:1}) are correction terms accounting for the effect of plastic spin.
+	
+	For single crystal plasticity, the plastic strain rate is commonly represented through slip rates $\dot{\gamma}^{(s)}$ resolved onto the primary slip systems $s=1, \ldots, n_{slip}$:
+	\begin{align}
+	\mathbf{\tilde{l}}^p &= \sum_{s=1}^{n_{slip}}\dot{\gamma}^{(s)} \left(\mathbf{\tilde{b}}^{(s)} \otimes \mathbf{\tilde{n}}^{(s)}\right) \\
+	\bar{\mathbf{d}}^p &= \sum_{s=1}^{n_{slip}} \dot{\gamma}^{(s)} \mathbf{R}^{pT}\tilde{\mathbf{m}}^{(s)}\mathbf{R}^p \\
+	\bar{\mathbf{w}}^p &= \sum_{s=1}^{n_{slip}} \dot{\gamma}^{(s)} \mathbf{R}^{pT}\tilde{\mathbf{q}}^{(s)}\mathbf{R}^p \\
+	\tilde{\mathbf{m}}^{(s)} &= \text{sym} \left( \tilde{\mathbf{b}}^{(s)} \otimes \tilde{\mathbf{n}}^{(s)} \right) \\
+	\tilde{\mathbf{q}}^{(s)} &= \text{skew} \left( \tilde{\mathbf{b}}^{(s)} \otimes \tilde{\mathbf{n}}^{(s)} \right)
+	\end{align}
+	where $\tilde{\mathbf{b}}^{(s)}$ is the slip direction within a crystal plane $s$ and $\tilde{\mathbf{n}}^{(s)}$ is the unit normal to plane $s$.
+    The ``tilde'' overbar refers to quantities in the lattice frame while the flat overbar denotes quantities in the current deformed frame.
+    Additionally, the evolution of the plastic rotation rate is expressed through the plastic vorticity as $\dot{\mathbf{R}}^p = \bar{\mathbf{w}}^p \mathbf{R}^p$.
+	
+	The extended grain-scale crystal plasticity model for the Ti-6242 near alpha titanium alloy accounting for flow softening follows from the bimodal titanium model proposed in \cite{r18}.
+	For the current developments, only microstructures containing primary $\alpha_p$ particles are considered.
+	This constitutive model incorporates a decreasing slip resistance due to plastic deformation.
+	The slip rate $\dot{\gamma}^{(s)}$ on each slip system $s$ is taken as a power law expression involving the resolved shear stress $\tau^{(s)}$ and the slip resistance $\xi^{(s)}$ :
+	
+	\begin{equation}
+	\dot{\gamma}^{(s)} = \dot{\gamma}{_0^{(s)}} \left| \frac{\tau^{(s)}}{\xi^{(s)}} \right| ^{1/m} \text{sign} \left( \tau^{(s)} \right)
+	\label{eq:4}
+	\end{equation}
+	Here $\dot{\gamma}{_0^{(s)}}$ is the reference strain rate, $m$ is a constant exponent and $\xi^{(s)}$ is the slip resistance of slip system $s$.
+	The slip resistance evolution is expressed through a combination of self-hardening and latent hardening:
+	\begin{equation}
+	\label{eq:5}
+	\dot{\xi}^{(i)} = \sum_{j=1}^{n_{slip}} h^{(ij)} \left| \dot{\gamma}^{(j)} \right| = \sum_{j=1}^{n_{slip}} q^{(ij)} h^{(j)} \left| \dot{\gamma}^{(j)} \right|
+	\end{equation}
+	Here $h^{(ij)}$ is the combination of self-hardening rate $h^{(j)}$ and latent hardening rate $q^{(ij)}$.
+	The value of $q^{(ij)}$ is set to 1 for all $i$ and $j$, such that full latent-hardening is considered. The self-hardening rate follows a Voce-type equation:
+	\begin{equation}
+	h^{(j)} = h{_0^{(j)}} \left| 1-\frac{\xi^{(j)}}{\xi{_s^{(j)}}} \right|^r \text{sign} \left( 1-\frac{\xi^{(j)}}{\xi{_s^{(j)}}} \right),\,
+	\xi{_s^{(j)}} = \tilde{\xi}^{(j)} \left( \frac{\dot{\gamma}^{(j)}}{\dot{\gamma}_0} \right) ^n .
+	\label{eq:6}
+	\end{equation}
+	Here $h{_0^{(j)}}$ is the initial hardening rate, and the saturation resistance $\xi{_s^{(j)}}$ is taken as a power-law relation of the current slip rate with exponent $n$ and pre-factor $\tilde{\xi} ^{(j)}$.
+	Section \ref{parameter} describes the slip system families employed for the $\alpha _p$ phase and its relative constitutive parameters.
+	Note that this model does not have contributions from geometrically necessary dislocation or strain gradient terms and hence is not size dependent.
+	
+    The CP constitutive model (\ref{eq:4})--(\ref{eq:6}) was originally developed to describe the rate-sensitive strain hardening relation between shear strain rate $\dot{\gamma}^{(s)}$ and resolved shear stress $\tau^{(s)}$, and was applied to model Ti-6242 in \cite{r18}.
+      We extended this model to describe also the strain softening behavior by simply setting the initial hardening variable $\xi_0$ to be larger than the saturated resistance $\xi_s = \xi_s \left( \dot{\gamma}_0 ,\, \tilde{\xi} \right)$, such that the hardening rate $h^{(j)}$ becomes negative according to equation (\ref{eq:6}).
+
+	\textbf{Remark:} \textit{For initial elastic loading or the case when certain slip systems are not activated during the deformation, the slip rate $\dot{\gamma}^{(i)}$ and consequently $\xi{_s^{(i)}}$ on certain slip systems remain close to zero, which causes numerical issues in (\ref{eq:6}).
+	To avoid this deficiency, the lower bound of $\xi{_s^{(i)}}$ was set to be $\tilde{\xi}^{(i)}/4$, which is smaller than the actual saturation stress of an activated system.}
+	\subsection{Generalized implicit material update algorithm}	
+	In order to account for slip system dependence of the flow resistance, the Green-Naghdi stress rate based material update algorithm was modified from the work of \cite{r22}, where only one hardening variable is allowed.
+	This algorithm was modularized to accommodate any crystal plasticity model with multi-hardening variables, where only 6 terms are model dependent, i.e. two residual terms and four tangent stiffness terms. 
+	
+	In the finite element setting, the material evolution equations (\ref{eq:1}) and (\ref{eq:5}) are tracked at the integration points of elements within the mesh during a series of time steps.
+	Therefore, the objective of the material update routine is to advance the values of the stress and hardening variables to time $t_{n+1} = t_n + \Delta t$.
+	Both equations (\ref{eq:1}) and (\ref{eq:5}) will be integrated using a backward Euler scheme, and together represent an implicit system of equations to be solved.
+	The equations are:
+	\begin{gather}
+	\mathbf{0} = \mathbf{R}_1 = \mathbf{t}_{n+1} - \left[ \mathbf{t}_n + \mathbf{\dot{t}} \left( \mathbf{t}_{n+1},\, \bm{\xi}_{n+1},\, \Delta\mathbf{d}_{n+1} \right) \Delta t \right] 
+	\label{eq:7} \\
+	\mathbf{0} = \mathbf{R}_2 = \bm{\xi}_{n+1} - \left[ \bm{\xi}_n + \bm{\dot{\xi}} \left( \mathbf{t}_{n+1},\, \bm{\xi}_{n+1},\, \Delta\mathbf{d}_{n+1} \right) \Delta t \right] 
+	\label{eq:8}
+	\end{gather}
+	where the incremental deformation rate $\Delta \mathbf{d}_{n+1} = \mathbf{d}_{n+1} \Delta t$ is specified from the current best estimate of the nodal displacement increment, and $\bm{\xi}$ is the set of hardening variables (presently, the slip resistances $\xi{_s^{(s)}} ,\, i=1,\ldots , n_{slip}$).
+	
+	The quantities within the objective stress update (\ref{eq:7}) \textcolor{red}{and hardening variable update (\ref{eq:8})} are defined with respect to the time discrete counterparts:
+	\begin{gather}
+	\allowdisplaybreaks
+	\mathbf{\dot{t}}_{n+1}\Delta t = \mathbf{C}_0 : \left( \Delta\mathbf{d}_{n+1} - \Delta\bar{\mathbf{d}}{_{n+1}^p} \right) + \Delta\bar{\mathbf{W}}{_{n+1}^p}\mathbf{t}_{n+1} - \mathbf{t}_{n+1}\Delta\bar{\mathbf{W}}{_{n+1}^p}\\
+	\Delta\bar{\mathbf{d}}{_{n+1}^p} = \sum_{s=1}^{n_{slip}} \Delta \gamma{_{n+1}^{(s)}} \mathbf{R}{_n^{pT}}\tilde{\mathbf{m}}^{(s)}\mathbf{R}{_n^p}
+	\label{eq:10} \\
+	\Delta\bar{\mathbf{W}}{_{n+1}^p} = \mathbf{R}_{n+1} \left[ \sum_{s=1}^{n_{slip}} \Delta \gamma{_{n+1}^{(s)}} \mathbf{R}{_n^{pT}}\tilde{\mathbf{q}}^{(s)}\mathbf{R}{_n^p} \right] \mathbf{R}{_{n+1}^T}\\
+	\Delta\gamma{_{n+1}^{(s)}} = \dot{\gamma}^{(s)} \left( \tau{_{n+1}^{(s)}} ,\, \xi_{n+1} ,\, \frac{\Delta\mathbf{d}_{n+1}}{\Delta t} \right)\Delta t\\
+	\tau{_{n+1}^{(s)}} = \mathbf{t}_{n+1}:\left( \mathbf{R}{_n^{pT}} \tilde{\mathbf{m}}^{(s)} \mathbf{R}{_n^p} \right)
+	\label{eq:13} \\
+	\mathbf{R}{_{n+1}^p} = \exp \left( \Delta\bar{\mathbf{w}}{_{n+1}^p} \right) \mathbf{R}{_n^p}\\
+	\textcolor{red}{
+	\dot{\xi}^{(i)}_{n+1} = \dot{\xi}^{(i)}_{n} + \sum_{j=1}^{n_{slip}} h^{(ij)}_{n+1} \left| \dot{\gamma}^{(j)}_{n+1} \right| \Delta t.
+	\label{eq:hard}
+	}
+	\end{gather}
+	
+	Notice that the plastic rotation tensor $\mathbf{R}^p$ is treated in an explicit fashion since the value from time $t_n$ is used in equations (\ref{eq:10})--(\ref{eq:13}).
+	This algorithmic assumption greatly simplifies the nonlinear system of equations (\ref{eq:7})--(\ref{eq:8}) and generally is appropriate because the evolution of plastic rotation $\mathbf{R}^p$ is relatively slow compared to the plastic strain rate $\bar{\mathbf{d}}^p$ (\cite{r22}).
+	\textcolor{red}{Equation (\ref{eq:hard}) specializes the hardening variable update for the material model described in equation (\ref{eq:4})--(\ref{eq:6}).}
+	
+	The residual equations (\ref{eq:7})--(\ref{eq:8}) are solved using a Newton-Raphson scheme with appropriate initial guesses for the stress $\mathbf{t}_{n+1}$ and hardening $\bm{\xi}_{n+1}$.
+	A generic iteration of this algorithm is summarized in Table \ref{table:1}, where the superscript $i$ denotes the value at the indicated iteration.
+	%
+	% Table 1: stress update algorithm
+	%
+	\begin{table}[htbp]
+	\centering
+	\caption{\label{table:1}Newton-Raphson algorithm for stress update}
+	\begin{tabular}{|r c|}
+	\hline
+      1. Check & compare $\Vert \mathbf{R} \Vert$ and $R_{tol}$ \\
+      2. Solve & $\begin{bmatrix} \mathbf{J}_{11} & \mathbf{J}_{12} \\ \mathbf{J}_{21} & \mathbf{J}_{22} \end{bmatrix}\begin{bmatrix} \delta \mathbf{t} \\ \delta \bm{\xi} \end{bmatrix}=-\begin{bmatrix} \mathbf{R}_1 \\ \mathbf{R}_2 \end{bmatrix}$ \\
+      3. Update & $\begin{bmatrix} \mathbf{t}{_{n+1}^{i+1}} \\ \bm{\xi}{_{n+1}^{i+1}} \end{bmatrix}=\begin{bmatrix} \mathbf{t}{_{n+1}^i} \\ \bm{\xi}{_{n+1}^i} \end{bmatrix}+\begin{bmatrix} \delta \mathbf{t} \\ \delta \bm{\xi} \end{bmatrix}$ \\
+      4. Form & $\begin{bmatrix} \mathbf{R}_1 \\ \mathbf{R}_2 \end{bmatrix}=\begin{bmatrix} \mathbf{R}_1 \left( \mathbf{t}{_{n+1}^i},\,\bm{\xi}{_{n+1}^i} \right) \\ \mathbf{R}_2 \left( \mathbf{t}{_{n+1}^i},\,\bm{\xi}{_{n+1}^i} \right) \end{bmatrix},\,\mathbf{J}_{jk}=\mathbf{J}_{jk}\left( \mathbf{t}{_{n+1}^i},\,\bm{\xi}{_{n+1}^i} \right)$ \\
+      \hline
+	\end{tabular}
+	\end{table}
+	
+	At each iteration, the norms of the residuals $\Vert\mathbf{R}_1\Vert$, $\Vert\mathbf{R}_2\Vert$ are computed, and the algorithm is terminated when either the absolute norm or the relative norm of both residuals is below a user-specified tolerance $R_{tol}$.
+	The Jacobian sub-matrices are obtained from the consistent linearization of (\ref{eq:7})--(\ref{eq:8}), with $\mathbf{J}_{ij} = \partial\mathbf{R}_i / \partial\mathbf{x}_j$ and $\mathbf{x}_{j=1,2} = \lbrace\mathbf{t} ,\, \bm{\xi}\rbrace$.
+	Accounting for the specific forms assumed for the plastic slip rates (\ref{eq:4}) and the hardening variables (\ref{eq:5}), these derivatives can be expressed as follows, using index notation for clarity:
+	\begin{gather}
+	\begin{aligned}
+	\label{eq:14}
+	J_{11,ijkl} = \frac{\partial R_{1,ij}}{\partial t_{kl}} &= \frac{1}{2}\left( \delta_{ik}\delta_{jl}+\delta_{il}\delta_{jk} \right) + \frac{1}{2}\left( \delta_{ik}\Delta\bar{W}{_{lj}^p} + \delta_{il}\Delta\bar{W}{_{kj}^p} \right) 
+	- \frac{1}{2}\left( \Delta\bar{W}{_{ik}^p}\delta_{jl} + \Delta\bar{W}{_{il}^p}\delta_{jk} \right) \\
+	&+ \sum_{s=1}^{n_{slip}}\left[\left( C_{0,ijmn}\frac{\partial\Delta\bar{d}{_{mn}^p}}{\partial\Delta\gamma{_{n+1}^{(s)}}} + t_{im}\frac{\partial\Delta\bar{W}{_{mj}^p}}{\partial\Delta\gamma{_{n+1}^{(s)}}} - \frac{\partial\Delta\bar{W}{_{im}^p}}{\partial\Delta\gamma{_{n+1}^{(s)}}}t_{mj} \right) 
+      \underbrace{\frac{\partial\Delta\gamma{_{n+1}^{(s)}}}{\partial\tau^{(s)}}}_{\text{model}} \frac{\partial\tau^{(s)}}{\partial t_{kl}} \right]
+	\end{aligned}
+	\end{gather}
+	\begin{gather}
+	\begin{aligned}
+	&J_{12,ij\beta} = \frac{\partial R_{1,ij}}{\partial \xi_{\beta}} 
+	= \sum_{s=1}^{n_{slip}}\left[ -C_{0,ijmn}\frac{\partial\Delta\bar{d}{_{mn}^p}}{\partial\Delta\gamma{_{n+1}^{(s)}}}
+      + t_{im}\frac{\partial\Delta\bar{W}{_{mj}^p}}{\partial\Delta\gamma{_{n+1}^{(s)}}} - \frac{\partial\Delta\bar{W}{_{im}^p}}{\partial\Delta\gamma{_{n+1}^{(s)}}}t_{mj} \right]
+      \underbrace{\frac{\partial\Delta\gamma{_{n+1}^{(s)}}}{\partial\xi_{\beta}}}_{\text{model}}
+	\end{aligned}
+	\end{gather}
+	\begin{gather}
+	J_{21,ij\alpha} = \frac{\partial R_{2,\alpha}}{\partial t_{kl}} = -\Delta t\underbrace{\frac{\partial\dot{\xi}_\alpha}{\partial t_{kl}}}_{\text{model}}
+	\\
+	\label{eq:17}
+	J_{22,\alpha\beta} = \frac{\partial R_{2,\alpha}}{\partial \xi_{\beta}} = \delta_{\alpha \beta} - \Delta t \underbrace{\frac{\partial\dot{\xi}_\alpha}{\partial \xi_{\beta}}}_{\text{model}}
+	\end{gather}
+	
+	Each of the Latin alphabet subscripts varies from 1 to 3 for the spatial dimensions of the problem, although accounting for the symmetry of the stress tensor enables condensing from $3\times 3=9$ indices to 6 indices.
+	Each of the Greek alphabet subscripts varies from 1 to the number of hardening variables $n_{hard}$.
+	When the Newton-Raphson algorithm (Table \ref{table:1}) has been terminated after sufficient reduction of the residuals, the consistent values for $\mathbf{t}$ and $\bm{\xi}$ have been found for the current value of the strain increment $\Delta \mathbf{d}_{n+1}$ at the integration point.
+	The unrotated stress $\mathbf{t}$ is then transformed to the Cauchy stress $\bm{\sigma}$ and used by the element subroutine to compute the internal force vector for assembly in the global equilibrium residual vector.
+	Similarly, the tangent moduli $\mathbf{T}_{n+1}=\partial \mathbf{t}_{n+1} / \partial \Delta\mathbf{d}_{n+1}$ for the global equilibrium tangent matrix are computed from (\ref{eq:14})--(\ref{eq:17}) along with other terms described in \cite{r22}.
+	
+	The significance of this generalized stress update algorithm is that the model dependent terms are clearly isolated from the crystal plasticity kinematics as two scalar constitutive terms $\dot{\gamma}^{(s)}$ and $\dot{\xi}_{\alpha}$, and four tangent terms as shown in (\ref{eq:14})--(\ref{eq:17}).
+	Thus, other constitutive models, e.g. mechanical threshold models (\cite{r24}) and dislocation density based models (\cite{r25}), can be conveniently implemented in this framework.
+
+	\subsection{Parameter identification}
+	\label{parameter}
+	Anisotropic elastic constants of single crystal Ti-6242 are listed in Table \ref{table:2}.
+	The relative ratio between elastic constants was fixed according to the values at room temperature reported in \cite{r18}, and the magnitude was adjusted according to the temperature-dependence of the Young's modulus experimentally measured in \cite{r26}.
+	Transverse isotropy was adopted for the hexagonal close-packed $\alpha _p$ phase, and the $c$-axis coincides with the $z$ direction.
+	Elastic constants measured at 1172 K are about 20 \% smaller than those at room temperature.
+	%
+	% Table 2: elastic constants
+	%
+	\begin{table}[!htb]
+	\centering
+	\caption{\label{table:2}Elasticity constants of Ti-6242 in the material coordinates (1172 K)}
+	\begin{tabular}{c c c c c c}
+	\hline
+	$C_{11}$(GPa)&$C_{33}$(GPa)&$C_{12}$(GPa)&$C_{13}$(GPa)&$C_{44}$(GPa)&$C_{66}$(GPa)\\
+	\hline
+	132.8 & 159.4 & 76.56 & 67.19 & 39.84 & 28.12\\
+	\hline
+	\end{tabular}
+	\end{table}
+	
+	The material parameters from \cite{r18} were recalibrated to match the softening observed at 1172 K (\cite{r26}).
+	The calibration was performed through a series of finite element simulations that employed a single finite element with 100 random orientations of crystals homogenized through the Taylor assumption.
+	Constant true strain rate simulations were performed at $\dot{\varepsilon}=0.01\text{ s}^{-1}$, which is consistent with the experiment (\cite{r26}).
+	The material parameters $\tilde{\xi}^{(j)}$, $h{_0^{(j)}}$ and $\xi{_0^{(j)}}$ were varied until the difference between experiment and simulation was minimized.
+	Three slip system families were considered: basal $\left< 11\bar{2}0 \right>\left\lbrace 0001 \right\rbrace$, prismatic $\left< 11\bar{2}0 \right>\left\lbrace 10\bar{1}0 \right\rbrace$, and 1st order pyramidal$-\left< c+a \right> \left< 11\bar{2}3 \right>\left\lbrace 10\bar{1}1 \right\rbrace$.
+	The ratio of slip system strengths was held fixed at 1.0:0.67:3.0 according to the critical resolved shear stress measured at 1088-1228 K from \cite{r27}.
+	The importance of the unequal slip resistances for the three systems versus a uniform resistance for properly capturing Ti-6242 MTR breakdown is demonstrated by a reference simulation in Section \ref{slip}.
+	
+	The calibrated material parameters are listed in Table \ref{table:3}.
+    Figure \ref{fig:1} compares the measured true stress-strain curve from constant strain rate $\left( \sim 0.01\text{ s}^{-1} \right)$ tests under three compression directions with the results  from the displacement-controlled finite element simulation.
+	The measured and simulated responses match well, and the softening behavior of stress-strain relation is well captured.
+	Note that softening response is achieved when the initial resistance $\xi_0$ exceeds the saturated resistance $\xi_s = \xi_s \left( \dot{\gamma}_0 ,\, \tilde{\xi} \right)$, which for example takes a value of about 49 MPa for the basal systems at the applied 0.01 $\text{s}^{-1}$ strain rate.
+	Here, $\xi_0$ is the initial value of the hardening variable $\xi$, where the latter \textcolor{red}{evolves} under continued deformation.
+	Due to the random texture assumption, the simulated stress-strain curve is less loading-axis dependent than the experimental curves, which are obtained from cylinders extracted at various angles relative to the long axis of a textured billet (\cite{r26}).
+	The initial yield stress is about 120 MPa, and gradually converges to 80 MPa as the applied strain increases to $-0.8$.
+	The plastic anisotropy caused by initial texture is apparent, especially at the onset of plastic yielding where flow stress in axial direction is 10 MPa larger than that in radial direction and $45^{\circ}$ direction.
+	It should be noted that the material parameters in Table \ref{table:3} were calibrated only for the hot-compression tests conducted at 1172 K with constant true strain rate of $\dot{\varepsilon}=0.01\text{ s}^{-1}$.
+	These material parameters are sufficient to correlate the simulation and EBSD measurements in Section \ref{results} to interpret the effect of loading axis on breakdown efficiency.
+    However, to also include the effects of temperature and strain rate, this model (or another temperature sensitive model) would likely need to be recalibrated based on stress-strain curves obtained from the billet material at multiple temperatures and strain rates.
+      %
+	% Table 3: parameters
+	%	
+	\begin{table}[!htb]
+	\centering
+	\caption{\label{table:3}Crystal plasticity parameters for Ti-6242 $\alpha_p$ particles at 1172 K}
+	\begin{tabular}{c c c c}
+	\hline
+	\,&Basal&Prismatic&Pyramidal\\
+	\hline
+	$\dot{\gamma}{_0}  \text{ (s}^{-1})$&0.12&0.12&0.12\\
+	$\tilde{\xi} \text{ (MPa)}$&69.38&46.25&208.13\\
+	$h_0 \text{ (MPa)}$&4.69&9.72&28.22\\
+	$\xi_0 \text{ (MPa)}$&68.08&54.46&163.4\\
+	$n$&0.14&0.15&0.15\\
+	$r$&0.30&0.29&0.29\\
+	$m$&0.20&0.20&0.20\\
+	\hline
+	\end{tabular}
+	\end{table}
+	%
+	% Figure 1
+	%
+	\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.4]{Figure1.eps}
+	\caption{True stress-strain response from Taylor simulation (random texture) and cylinder compression experiments (1172 K) (\cite{r26})}
+	\label{fig:1}
+	\end{figure}
+	\subsection{Simulation microstructure description}
+	The initial microstructure and texture for the CPFE simulations were designed to capture the main features of the experimental methods in \cite{r26}.
+	% (1) introduce billet material
+	Therein, the billet material is a commercially produced near-$\alpha$ alloy Ti-6Al-2Sn-4Zr-2Mo-0.1Si (Ti6242S).
+	Experiment characterizations suggest that this 209-mm-diameter billet was obtained from preliminary extrusion, resulting in a microstructure of equiaxed 10 $\mu$m diameter $\alpha_p$ particles.
+	Typically, such extrusion leads to a fiber texture with $\left< 10\bar{1}0 \right>$ parallel to the axial direction, while the $c$-axis equally distributes along the radial direction (\cite{r5}).
+	The actual macrotexture pole figures of the 209-mm-diameter billet material are reproduced in Figure \ref{fig:2} (a).
+	Overall, the macrotexture is relatively weak ($\sim 2.5 \times$random), and $\left< 10\bar{1}0 \right>$ parallel to the axial direction is one major texture component.
+	Because of the low strain from preliminary processing, the texture components are not strong, and low density peaks scatter throughout the $(0001)$ pole figure.
+	$\alpha/\beta$ processing by cogging and/or extrusion to produce billet or bar stock generally leads to the formation of a $\left< 10\bar{1}0 \right>$ texture at large strains, but \textcolor{red}{the extrusion strain of the current sample} was only sufficient to rotate some grains to this orientation.
+	As the extrusion strain increases, such as the case of the 57-mm-diameter billet material shown in Figure \ref{fig:2} (b), the exhibited texture components are stronger and closer to the theoretical components.
+	However, strong MTRs with moderate aspect ratio ($\sim 4:1$) do exist in the 209-mm-diameter billet material, as shown by the inverse pole figure of Figure \ref{fig:2} (c).
+	The mean diameter of MTR is about 800 $\mu$m, and the volume fraction of MTR is about 0.6 (\cite{r5}).
+	Pairs of neighboring MTRs with orthogonal $c$-axis are still present.
+	Previously, successive extrusion processing was found to be less effective at eliminating such pairs of MTRs with stable orientation ($\left< 10\bar{1}0 \right>$ parallel to the axial direction).
+
+	% (2) introduce experimental procedure
+	In order to optimize the TMP parameters for eliminating such stable MTRs, samples taken from the billet material were compressed isothermally at 1172 K with different compression directions (\cite{r26}).
+	Specifically, the compression direction is $0^{\circ}$ (axial compression), $45^{\circ}$ and $90^{\circ}$ (radial compression) to the billet axis.
+	In order to obtain the morphology of $\alpha_p$ particles and $\beta$ matrix at elevated temperature, samples were water quenched after compression up to 1.07 true strain.
+	More details about the experiment are given in \cite{r26}.
+
+% (3) introduce simulation setup
+	Herein, a 5 mm $\times$ 5 mm $\times$ 5 mm idealized volume element (IVE) containing two MTRs was employed to investigate the breakdown of MTRs under different compression directions, as shown in Figure \ref{fig:2simu}.
+	Also, the present CPFE model assumes that texture evolution of Ti-6242 deformed at 1172 K is mainly controlled by slip-based deformation of $\alpha_p$ particles.
+	The green and red regions are sufficiently large that they represent collections of similarly oriented $\alpha_p$ particles, or two MTRs, while the blue region is a homogeneous matrix with random orientation.
+	These two MTRs have an elongated capsule shape, such that the length and diameter of the geometry is comparable to the experimental observations.
+	The adjacent MTRs also makes it straightforward to see the interaction between two MTRs.
+	The total volume of the MTRs in the simulation domain is about 5 \%.
+	Actually, at 1172 K, the microstructure of Ti-6242 from typical processing contains equiaxed $\alpha _p$ particles with similar orientation (75 \%) with the remaining balanced by $\beta$ phase (25 \%) (\cite{r26}).
+	Herein, idealized MTRs with simplified shape and uniform initial orientation were chosen as a benchmark case.
+	The hexahedral mesh is a uniform grid with 100 voxels along each domain edge, and the MTR-matrix interfaces are non-smooth.
+	The size of each element is 50 $\mu$m, which is equivalent to a few $\alpha_p$ particle diameters.
+	The mesh resolution in the MTRs is significantly refined in order to capture the lattice rotation gradients within and between both MTRs.
+	%
+	% Figure 2. experiment pole figure and EBSD
+	%
+	\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.7]{Figure2.jpg}
+	\caption{\label{fig:2}Representative EBSD measurement of the macrotexture and microtexture distribution within the billet material:
+      Macrotexture pole figures ($(0001)$ and $(10\bar{1}0)$) of (a) the 209-mm-diameter billet and (b) the 57-mm-diameter billet at mid-radius location (\cite{r5}).
+      (c) Axial direction crystal-orientation maps for 209-mm-diameter billet at mid-radius location, where the billet axis is perpendicular to the plane.
+      A spatial cluster of similar or identical color indicates alpha particles forming a microtextured region (MTR).}
+	\end{figure}
+	%
+	% Figure 3 simulation initial orientation
+	%
+	\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.8]{Figure3.jpg}
+	\caption{\label{fig:2simu}Initial configuration of the MTR (slice of 3D geometry) used in the present study for three loading cases.
+      White arrows indicate billet axis, hexagons depict the MTR lattice orientation, and the black arrow indicates compression direction.
+      (a) compression $0^{\circ}$ to billet axis; (b) compression $45^{\circ}$ to billet axis; (c) compression $90^{\circ}$ to billet axis.}
+	\end{figure}
+	%
+	% Table 4: number of elements
+	%
+	% \begin{table}[!htb]
+	% \centering
+	% \caption{\label{table:4}Total number of elements (in thousands)}
+	% \begin{tabular}{c c c c c}
+	% \hline
+	% &\multicolumn{2}{c}{ND (or TD) compression}&\multicolumn{2}{c}{$45^{\circ}$ compression}\\
+	% &hex-mesh&tet-mesh&hex-mesh&tet-mesh\\
+	% \hline
+	% region 1&\hfil 18&\hfil 31&\hfil 23&\hfil 23\\
+	% region 2&\hfil 18&\hfil 31&\hfil 23&\hfil 23\\
+	% matrix&\hfil 965&\hfil 607&\hfil 955&\hfil 630\\
+	% \hline
+	% \end{tabular}
+	% \end{table}
+	
+	Compression was applied to the IVE along three different directions to investigate the corresponding MTR breakdown efficiency, as shown in Figure \ref{fig:2simu}.
+	% sentence saying that ND TD RD are refered to rolled planes of Ti6242 and the common MTR c-axis orientation comes from that [];
+	The orientations of the two MTRs are selected from the theoretical extrusion macrotexture to approximate the billet textures in Figure \ref{fig:2}, where the $\left< 10\bar{1}0 \right>$ direction is parallel to the billet axis and the $c$-axis is along the radial direction.
+	Thus, these two idealized regions act as samples of MTR from within the macrotexture of the three compression cylinders described previously.
+	This orientation of MTR is different from those after rolling as described in \cite{r29,r30}, where the $c$-axis coincides with RD and TD while the common crystal direction $\left< 11\bar{2}0 \right>$ coincides with ND.
+	In the RVE, each finite element in the matrix was assigned a different orientation from a random initial texture.	
+	Notice that the MTRs are compressed in series for Figure \ref{fig:2simu} (a) and in parallel for Figure \ref{fig:2simu} (c).
+	Also notice for the radial case Figure \ref{fig:2simu} (c) that region 1 is oriented with the $c$-axis perpendicular to load axis (soft orientation) while region 2 has its $c$-axis parallel to load axis (hard orientation).
+
+	Prescribed displacements were applied on the loading surface such that the true strain rate was 0.01 s\textsuperscript{-1}.
+	Multi-point constraints (MPC) were applied on the transverse surfaces to approximate a uniaxial state of remote stress on the IVE.
+	The IVE simulations were performed using Warp3d (\cite{r21}) in a high performance parallel computing environment.
+    Approximate wall clock time for each IVE simulation is about 30 hours when 18 shared memory threads are used.
+	The resulting plastic strain, slip system activity and lattice rotation were compared to understand the breakdown of the two MTRs.
+	The deformed Euler angles from the models were imported into MTEX (\cite{r31}) to calculate the corresponding orientation distribution functions (ODF) and subsequently generate pole figures and inverse pole figures.
+\section{Results}
+\label{results}
+	\subsection{Equivalent plastic strain distribution within MTRs}
+	MTR breakdown efficiency is often influenced by inhomogeneous plastic strain.
+	Figure \ref{fig:3} shows the equivalent plastic strain distribution within MTRs plotted on the deformed configuration after compression at 1172 K up to $-0.51$ true strain.
+	Figure \ref{fig:4} presents the equivalent plastic strain distribution along the central line inside each MTR at $-0.51$ macroscopic strain.
+	The arc length measures the length along the selected path within the MTRs from one end to the other, with 0.0-1.5 mm representing region 1 and 1.5-3.0 mm representing region 2 for all three figures.
+	% influence of loading direction
+	These results reveal that plastic strain is more inhomogeneous for the $0^{\circ}$ (axial) compression case compared with the other two compression directions.
+	For $0^{\circ}$ (axial) compression, the circular cross-section evolves into an elliptical shape.
+	The long axis of the ellipse is perpendicular to the crystal plane $(11\bar{2}0)$ for both regions.
+	Due to strain accommodation of the two regions, the plastic strain along the interface between the two regions is lower than that in the region interiors, and the transition is rather smooth.
+	Moreover, strong fluctuations appear in the equivalent plastic strain distribution within both regions, indicating a possibility of high breakdown efficiency.
+	For $45^{\circ}$ compression, the MTRs exhibit relatively unchanged shape and rotate as a unit toward the radial direction of the sample after deformation.
+	Both maximum and minimum local strain exists at the interface between the two regions, while the local strain within each region is relatively homogeneous.
+	For $90^{\circ}$ (radial) compression, equivalent plastic strain in region 1 is as high as 0.6, while in region 2 the average value is generally lower than 0.3.
+	Strain transition from region 1 to region 2 is rather smooth.
+
+	% influence of mesh type
+	Previous studies found that the choice of element type may influence the quality of CPFE simulation results, especially at MTR boundaries where stress concentrations exist (\cite{r28}).
+	To quantitatively understand this influence, meshes with linear hexahedral elements and meshes with quadratic tetrahedral elements were generated for all three compression directions, and the resulting plastic strain distributions were compared.
+	For brevity, the results are not shown here.
+	The major conclusion is that the deformed shape of the MTRs as well as the plastic strain distribution away from the boundaries ($1\sim 2$ element diameters) are in close agreement for both mesh types, indicating that the interior response has not been affected.
+	
+	%
+	% Figure 4
+	%
+	\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.6]{Figure4.jpg}
+	\caption{\label{fig:3}Equivalent plastic strain distribution within MTRs on deformed configuration after compression at 1172 K to $-0.51$ true strain (cross-section view on the mid plane).}
+	\end{figure}
+	%
+	% Figure 5
+	%
+	\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.6]{Figure5.eps}
+	\caption{\label{fig:4}Equivalent plastic strain distribution along center line of MTR. (a) $0^{\circ}$ (axial) compression; (b) $45^{\circ}$ compression; (c) $90^{\circ}$ (radial) compression.}
+	\end{figure}
+	\subsection{Slip system activity}
+	\label{slip}
+	The development of orientation distribution within each MTR indicates that different lattice rotations have occurred over the MTR region.
+    Differences in lattice rotation result from differences in slip system activity.
+    This section compares the accumulated shear strain, defined by $\int_{0}^{t} \vert \dot{\gamma}^{(s)} \vert \text{d}t$, for the three most activated slip systems under different loading directions.
+    Figure \ref{fig:5} demonstrates the predicted activities of slip systems along the central line from these two MTRs with different initial orientations at macroscopic true strain $-0.51$.
+	Contribution from the pyramidal slip systems is fairly low in each case.
+	
+	% ND compression, two system equally activated
+	For $0^{\circ}$ (axial) compression, the compression direction is along $[10\bar{1}0]$ of both regions, such that two prismatic slip systems are most activated.
+	It is interesting to find that in some places, the prismatic system $[\bar{1}2\bar{1}0]$ is more activated while in other places the prismatic system $[\bar{2}110]$ becomes more activated.
+	Such competitive activity in both regions will result in increasing misorientation within both MTRs.
+	The slip system activity at the MTR boundary is much lower than in the interior, mainly because the high $75.5^{\circ}$ angle between the slip planes on both sides makes the transfer of shear strain more difficult across the regions.
+	Further interpretations about the competitive slip system activity are discussed in Section \ref{discussion}.
+	
+	% 45 compression, one single system most activated, co-rotation
+	When the compression direction is aligned at $45^{\circ}$ to the billet axis, a single prismatic slip system dominates in region 1 while two basal slip systems are equally activated in region 2.
+	The distribution of accumulated shear strain of each slip system is rather smooth compared with $0^{\circ}$ (axial) compression, even when two basal slip systems are equally activated in region 2.
+	In both regions, other slip systems are also activated, but the accumulated shear strain is generally less than 30 \% of the most activated slip system.
+	
+	% TD compression, competing activation in region 2
+	For $90^{\circ}$ (radial) compression, the slip system activity is quite different.
+	In region 1, two prismatic slip systems are equally activated across the MTR domain.
+	Minimum shear strain also exists at the region boundary where dislocation transfer across the boundary is restricted.
+	For region 2, since the compression direction is perpendicular to the basal plane, only pyramidal slip systems are activated, and the accumulated shear strain is less than 0.1.
+	%
+	% Figure 6
+	%
+	\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.9]{Figure6.eps}
+	\caption{\label{fig:5}Accumulated shear strain of three most activated slip systems in each region: (a) $0^{\circ}$ (axial) compression; (b) $45^{\circ}$ compression; (c) $90^{\circ}$ (radial) compression.}
+	\end{figure}
+
+The variety of results for the accumulated plastic strain and slip system activity depend crucially upon the differing slip system resistances assigned in Table \ref{table:3}.
+Ti-6242 is known to exhibit anisotropic response at high temperatures (\cite{r27}).
+As a comparison, the $0^{\circ}$ (axial) compression case was simulated again using the averaged initial and saturation parameters from Table \ref{table:3} assigned to all of the basal, prismatic and pyramidal slip systems.
+The resulting macroscopic stress-strain curve for equal hardening is only slightly different from the simulation with distinct hardening values.
+However, the equivalent plastic strain and accumulated shear strain distribution vary significantly from Figure \ref{fig:3} and Figure \ref{fig:5}(a).
+In the single-hardening-constant case, the equivalent plastic strain within the MTRs is essentially homogeneous at about 0.55.
+The pyramidal slip systems also contribute a larger fraction to the macroscopic plastic strain.
+Therefore, the single-hardening-constant model cannot accurately predict the MTR breakdown efficiency.
+	\subsection{Lattice rotation}
+	Previous experimental studies (\cite{r13}) revealed a profound influence of the slip system activity on the breakdown of MTR in Ti-6Al-4V.
+	Also, slip system activity is influenced by the orientation of MTRs with respect to the compression direction.
+	Presently, the CPFE numerical simulations provide a prediction of the microtexture evolution to suggest which compression direction is more effective at breaking down the MTR.
+	The following sections examine the texture that develops in the matrix and the MTR for each loading case.
+	Also, the disorientation about the average deformed orientation is quantified within each MTR.
+		\subsubsection{Matrix texture evolution}
+		The texture of the matrix after high temperature compression contains two dominant components, similar to the macrotextures in \cite{r29,r30}.
+		For the major component, the $c$-axis is within $15^{\circ}-30^{\circ}$ of the compression direction with random distribution around the compression axis.
+		The other major component consists of $\alpha_p$ particles for which the $c$-axis is perpendicular to the compression direction.
+		For brevity, matrix pole figures are not shown.
+		The results for all 3 loading directions are quantitatively similar such that the individual MTR at 5 \% volume fraction do not impact the bulk matrix response.
+		%
+		% Figure 6
+		%
+		% \begin{figure}[!htb]
+		% \centering
+		% \includegraphics[scale=1]{Figure6.jpg}
+		% \caption{\label{fig:6} Pole figures of the as-received billet material taken from (\cite{r26}). The sample reference frame is indicated by the axial (A) and radial (R) directions in the billets. (a) $(0001)$; (b) $(10\bar{1}0)$.}
+		% \end{figure}
+		\subsubsection{Compression \texorpdfstring{$0^{\circ}$}{TEXT} to billet axis (axial compression)}
+		The lattice rotation evolution within the MTRs differs significantly from that of the matrix.
+		Pole figures of region 1 and region 2 after primary processing are shown in Figure \ref{fig:7} (a) and (b), respectively.
+		Figure \ref{fig:7} (c) shows the experimentally measured pole figure of the test specimen after $0^{\circ}$ (axial) compression at 1172 K, with the final true strain of 1.07 (i.e., a $3:1$ reduction).
+		For both regions, the loading axis is perpendicular to $(10\bar{1}0)$, and prismatic slip systems are most activated (see Figure \ref{fig:5} (a)).
+		Generally, the $c$-axis remains fixed, while other crystallographic directions exhibit very large rotation around the $c$-axis ($<30^{\circ}$).
+		The orientation of both regions is unstable such that different $\alpha_p$ particles have either a positive or negative rotation about the transverse (radial) axes.
+		Similar randomization is observed in the EBSD measurement of Figure \ref{fig:7} (c), where the $(10\bar{1}0)$ pole figure exhibits much reduced intensity compared with the specimen response for other compression directions, shown in later figures.
+		However, the texture components in the $(0001)$ pole figure still remain relatively strong ($\sim 1.5 \times$random).
+		Logical explanations for why the $0^{\circ}$ (axial) compression causes unstable lattice rotation are given in Section \ref{discussion1}.
+		
+		The spatial distribution of lattice rotation is also critical for assessing the breakdown of MTRs.
+		Figure \ref{fig:10} shows the cross-section plot of the orientation map for $0^{\circ}$ (axial) compression on the deformed configuration.
+		The compression direction is along the horizontal direction of the figure.
+		For both regions, in-plane rotation around the $c$-axis is obvious at both the MTR boundary and interior, indicating that breakdown of this region is effective.
+		However, the change of the $c$-axis direction is quite limited, so that the basal planes of most $\alpha_p$ particles are still aligned.
+		%
+		% Figure 7
+		%
+		\begin{figure}[!htb]
+		\centering
+		\includegraphics[scale=0.8]{Figure7.jpg}
+		\caption{\label{fig:7}Pole figures corresponding to $0^{\circ}$ (axial) compression: (a) region 1 from CPFE ($\varepsilon =-0.51$);
+            (b) region 2 from CPFE ($\varepsilon =-0.51$).
+            Magenta dots denote the initial MTR orientation.
+            (c) EBSD measurement ($\varepsilon =-1.07$).
+            The EBSD measurement (\cite{r26}) also includes $\alpha_p$ particles with other orientations besides the major components adopted in simulation (same for the following figures).}
+		\end{figure}
+		%
+		% Figure 8
+		%
+		\begin{figure}[!htb]
+		\centering
+		\includegraphics[scale=0.8]{Figure8.jpg}
+		\caption{\label{fig:10}Orientation map of MTRs with respect to axial direction after $0^{\circ}$ (axial) compression ($\varepsilon=-0.51$, cross-section view on the mid plane)}
+		\end{figure}
+		\subsubsection{Compression \texorpdfstring{$45^{\circ}$}{TEXT} to billet axis}
+		Unlike $0^{\circ}$ (axial) compression, lattice rotation is much more obvious when the compression direction is $45^{\circ}$ to billet axis (Figure \ref{fig:8}), although the orientation spreading is limited.
+		In region 1 (Figure \ref{fig:8} (a)) where the $c$-axis is perpendicular to the compression direction, the basal-plane does not rotate while the slip plane of the most activated slip system rotates toward compression direction.
+		Since only prismatic slip systems are activated, and the initial orientation distribution is homogeneous, spreading of texture components within this region is very limited ($<10^{\circ}$).
+		On the other hand, for region 2 (Figure \ref{fig:8} (b)) where the $c$-axis is $45^{\circ}$ to the compression direction, the normal direction of the basal slip plane rotates about $15^{\circ}$ towards the compression direction.
+		This lattice rotation comes mainly from the boundary condition induced macroscopic strain instead of particle interaction and local instability.
+		Similar lattice rotation is also observed in EBSD measurement in Figure \ref{fig:8} (c), where the major texture components co-rotate instead of spreading out.
+		However, in EBSD measurement, it seems that the normal direction of basal slip plane rotates towards the transverse direction (perpendicular to the compression direction), while $(10\bar{1}0)$ components rotate towards compression direction.
+		This difference is probably caused by the different loading direction with respect to the MTR orientation, since the $c$-axis is not evenly distributed along radial direction.
+		It is still reasonable to conclude that, for $45^{\circ}$ compression, although the lattice rotation is large, the spreading of major texture components within each MTR is still quite limited.
+		%
+		% Figure 9
+		%
+		\begin{figure}[!htb]
+		\centering
+		\includegraphics[scale=0.8]{Figure9.jpg}
+		\caption{\label{fig:8}Pole figures corresponding to $45^{\circ}$ compression: (a) region 1 from CPFE ($\varepsilon =-0.51$); (b) region 2 from CPFE ($\varepsilon =-0.51$). Magenta dots denote the initial MTR orientation. (c) EBSD measurement ($\varepsilon =-1.07$).}
+		\end{figure}
+		\subsubsection{Compression \texorpdfstring{$90^{\circ}$}{TEXT} to billet axis (radial compression)}
+		Finally, for $90^{\circ}$ (radial) compression, lattice rotation and spreading within each MTR is shown in Figure \ref{fig:9}.
+		In this case, the $c$-axis is perpendicular to the compression direction in region 1, while it is parallel to the compression direction in region 2.
+		This is the most interesting case in practice, since region 2 is well known for its difficulty to break down and high potential for crack initiation when loaded along the compression direction at room temperature.
+		Our results show that both regions still behave stably when the specimen is compressed at 1172 K.
+		It is interesting to find that after such large deformation, MTRs are not noticeably broken down, and the average of each deformed texture component coincides with that of the initial configuration, suggesting that both MTRs behave as stable regions under this compression direction.
+		Only minor spreading of the $c$-axis is observed in region 2 (hard orientation) for the (0001) pole figure, coinciding with the activity on the pyramidal slip systems in Figure \ref{fig:5} (c).
+		Therefore, $90^{\circ}$ (radial) compression is a stable compression direction, where rotations of $\alpha_p$ particles are quite limited.
+		Similarly, the EBSD measured pole figure also shows strong texture components even after 1.07 true compression strain.
+		Compared with simulated texture components, the pole figure from EBSD measurement is very similar to the region 1 pole figure, while the texture component of region 2 is not observed.
+		Since the compression specimen was taken randomly from the mid-radius position of the billet, the texture component corresponding to region 2 may not have been present in the specimen.
+		Although the initial orientation is pristine, we can still conclude that subtransus compression along the radial direction is not a very effective path for MTR breakdown.
+		%
+		% Figure 10
+		%
+		\begin{figure}[!htb]
+		\centering
+		\includegraphics[scale=0.8]{Figure10.jpg}
+		\caption{\label{fig:9}Pole figures corresponding to $90^{\circ}$ (radial) compression: (a) region 1 from CPFE ($\varepsilon =-0.51$); (b) region 2 from CPFE ($\varepsilon =-0.51$). The location prior to deformation coincides with that at $-0.51$ true strain. (c) EBSD measurement ($\varepsilon =-1.07$).}
+		\end{figure}
+            
+        
+		\textbf{Remark: } \textit{
+		The CPFE simulations use exemplary microstructures with a pair of representative MTR to investigate the influence of compression direction on MTR breakdown efficiency, as opposed to the real yet complex microstructure shown in Figure \ref{fig:2} (c).
+		The advantage of this simplified approach is that the simulation size can be reduced (which is still very large), and the influence of external force can be isolated and analyzed independently.
+		On the other hand, the disadvantage is also obvious: there is a larger discrepancy between CPFE and EBSD measurement, especially for the reference experimental case where only one extrusion processing is applied and the initial texture component is not sharp enough.
+		However, by comparing the three loading direction results for the CPFE simulations and EBSD measurements as distinct groups, we can still find interesting common features which support our major conclusions:
+		(1) the most smooth and dispersed $(10\bar{1}0)$ pole figure appears in the $0^{\circ}$ (axial) compression case (Figure \ref{fig:7});
+            (2) the most obvious lattice rotation occurs in the $45^{\circ}$ compression case (Figure \ref{fig:8}); and
+            (3) the strongest texture components remain in the $90^{\circ}$ (radial) compression case (Figure \ref{fig:9}).
+            Certain major texture components are also consistent between the simulations and experiments, but not all of them.}
+            
+		\subsubsection{Disorientation distribution}
+		The pole figures qualitatively suggest that axial compression shows random lattice rotation around $c$-axis, $45^{\circ}$ compression has bulk rotation but limited disorientation, and radial compression has minor disorientation of the $c$-axis.
+		The disorientation distribution within each MTR is employed to quantify the breakdown efficiency.
+		Figure \ref{fig:11} shows the probability density distribution of disorientation with respect to mean orientation within each MTR after compression.
+		Disorientation distribution behaves quite differently when the compression direction is $0^{\circ}$, $45^{\circ}$ and $90^{\circ}$ to the billet axis.
+		Specifically, for region 1, the breakdown efficiency of $45^{\circ}$ compression is only slightly less compared with loading $90^{\circ}$ (radial) compression, both of which are less compared with $0^{\circ}$ (axial) compression.
+		Similarly, for region 2, disorientation distribution after $0^{\circ}$ (axial) compression is much larger than $45^{\circ}$ compression.
+		We note that the disorientation distribution for the $90^{\circ}$ (radial) compression case is the most spread out of all cases other than the $0^{\circ}$ (axial) case, indicative of the minor $c$-axis rotation that occurs as in Figure \ref{fig:9}(c).
+		Overall, disorientation for the majority of elements in the MTR is less than $10^{\circ}$ for $45^{\circ}$ compression and $90^{\circ}$ (radial) compression.
+		The limited disorientation in $45^{\circ}$ compression and $90^{\circ}$ (radial) compression is mainly because the MTR is oriented such that the normal of a stable crystallographic plane coincides with the compression direction (\cite{r32}).
+		%
+		% Figure 11
+		%
+		\begin{figure}[!htb]
+		\centering
+		\includegraphics[scale=1.2]{Figure11.eps}
+		\caption{\label{fig:11}Disorientation distribution within MTRs \textcolor{red}{after compression at 1172 K to $-0.51$ true strain}: (a) region 1; (b) region 2.
+		Horizontal axis is the average disorientation with respect to the mean MTR orientation after compression.
+		\textcolor{red}{The maximum disorientation value was deliberately limited to $30^{\circ}$, since the actual disorientations are almost all about the $c$-axis.}}
+		\end{figure}
+		
+		To further investigate the characteristic disorientation distribution pattern for each loading case, disorientation of each $\alpha_p$ particle (finite element) with respect to mean rotation is shown in Rodrigues space where hexagonal-hexagonal symmetry is considered, as shown in Figure \ref{fig:12}.
+		In general, the disorientation distribution pattern in Rodrigues space is quite different when external loading is $0^{\circ}$, $45^{\circ}$ and $90^{\circ}$ to the billet axis.
+		When the compression direction is parallel to the billet axis, $\alpha_p$ particles mainly rotate around the $c$-axis, and the rotation angles are almost evenly distributed.
+		Although the disorientation within both regions for axial compression is very large, the $c$-axis still remains similarly oriented.
+		When the compression direction is $45^{\circ}$ to the billet axis, both $c$-axis rotation and rotation around the $c$-axis are limited.
+		The smaller clusters of disorientation at $15^{\circ}$ and $30^{\circ}$ disorientation may be caused by the interaction between MTR boundary layer and the surrounding matrix.
+		When compression is $90^{\circ}$ to the billet axis, the disorientation is fairly limited especially in region 1 that is in a stable orientation with respect to the external loading.
+		The $c$-axis rotation is mildly evident in region 2 where compression direction is perpendicular to (0001) plane.
+		The $c$-axis spreading of $90^{\circ}$ (radial) compression is the largest among the three cases, though its extent is limited by the ability to deform plastically.
+		\textcolor{red}{It is also worth noting that the $45^{\circ}$ and $90^{\circ}$ compression cases produce distinct concentrations at $0^{\circ}$, $15^{\circ}$ and $30^{\circ}$.
+		These less intense peaks are mainly associated with finite elements at the MTR boundaries.}
+		%
+		% Figure 12
+		%
+		\begin{figure}[!htb]
+		\centering
+		\includegraphics[scale=0.8]{Figure12.jpg}
+		\caption{\label{fig:12}Disorientation distribution in Rodrigues space \textcolor{red}{after compression at 1172 K to $-0.51$ true strain}.
+		The disorientation is calculated by multiplying inverse rotation matrix and mean rotation matrix, which represents the orientation deviation of each element with respect to the mean orientation after compression.
+		The hexagonal-hexagonal symmetry is considered: (a) region 1; (b) region 2}
+		\end{figure}
+\section{Discussion}
+\label{discussion}
+In this study, a crystal plasticity finite element (CPFE) model was used to investigate the influence of compression direction on MTR breakdown efficiency in Ti-6242 during primary processing.
+The main modeling assumption was that slip-based deformation in $\alpha _p$ particles controls the evolution of texture components at 1172 K.
+Also, a previously developed phenomenological based model for room temperature behavior was extended to consider strain softening at processing temperature.
+To account for plastic anisotropy and unequal slip resistance, a general stress update procedure was developed for crystal plasticity constitutive models with multiple hardening variables.
+Simulation results of paired MTRs under compression demonstrate a significant influence of compression direction on the plastic strain distribution, slip system activity as well as lattice rotation.
+
+A mechanism-based explanation for why some colonies randomize during deformation while others persist was discussed previously by \cite{r13}.
+The authors found that orientations with a high Taylor factor that are amenable to slip on multiple families of slip systems would result in more randomization compared to those oriented for slip on a single family of slip planes.
+In the latter case, all particles would tend to co-rotate due to the restricted slip while the availability of multiple slip planes promotes more hetereogeneous deformation within colonies.
+The most difficult colonies to spheroidize have $c$-axis parallel to the compression direction and hence need to operate the higher strength pyramidal $\left< c+a \right>$ slip systems to deform.
+
+Our current investigation provides a deeper understanding of the MTR-breakdown process with different compression directions.
+An interpretation of this influence is suggested by the analysis of reorientation velocity divergence as described below.
+
+\subsection{Reorientation velocity and divergence field}
+\label{discussion1}
+% Introducing Figure 13 and Table 5. More focus on how these figures are made
+The lattice rotation rate vector $\mathbf{\dot{r}^e}$ and its divergence div $\mathbf{\dot{r}^e}$ was originally employed in Euler space to characterize the texture evolution of ideal texture components (\cite{Toth}).
+Recently, both $\mathbf{\dot{r}^e}$ and div $\mathbf{\dot{r}^e}$ were expressed in the Rodrigues fundamental region of the FCC symmetry group to investigate grain fragmentation in hot-deformed aluminum (\cite{r32}).
+In the current investigation, $\mathbf{\dot{r}^e}$ and div $\mathbf{\dot{r}^e}$ are expressed in the fundamental zone of the HCP symmetry group to quantify the MTR breakdown efficiency under uniaxial compression.
+Figure \ref{fig:13} explains the relationship between initial orientation and lattice reorientation velocity based on the Taylor model assumption.
+Figure \ref{fig:13} shows the magnitude and divergence of the reorientation velocity field in the Rodrigues' fundamental zone (FZ).
+% The FZ was first discretized into a mesh with 9000 nodes by 10-node tetrahedral finite element shape functions.
+% Then each of these initial orientations were extracted as sample points for the Taylor model simulation.
+% The reorientation velocity vector field was computed by subtracting the initial and final orientation of each sample point in FZ space after 0.08 compression strain.
+% The divergence of the reorientation velocity field is then obtained using the nodal values and FE shape functions within the FZ.
+The FZ was first discretized into a mesh containing 9000 nodes by 10-node tetrahedral finite element shape functions, where the spatial coordinate of each node gives the axis-angle representation of the initial orientation.
+These axis-angle coordinates were transformed into Euler angle triplets and supplied to a Taylor-homogenized crystal plasticity simulation.
+Then after 0.08 compression strain with large enough plastic strain and lattice rotation, the final orientations were transformed back to axis-angle representation.
+In this way, the reorientation velocity on the 9000-node mesh is defined as the orientation increment in Rodrigues' space divided by the time step.
+The divergence of the interpolated reorientation velocity field is then obtained by calculating the trace of its gradient tensor field using the shape function derivatives.
+This velocity field is not the actual reorientation velocity in axis-angle notation, since Rodrigues' space is not a linear vector space and does not follow the typical parallelogram law for vector addition.
+Nevertheless, this velocity field serves as a valid indicator of the orientations that tend to break down and is appropriate for the following analysis.
+%
+% Figure 13
+%
+\begin{figure}[!htb]
+\centering
+\includegraphics[scale=0.3]{Figure13.jpg}
+\caption{\label{fig:13}Lattice rotation velocity and its divergence expressed in Rodrigues' fundamental zone \textcolor{red}{after compression at 1172 K to $-0.08$ true strain}:
+(a) lattice rotation velocity;
+(b) divergence of lattice rotation velocity.
+Point A, C and E represents the initial orientation of region 1 for $0^{\circ}$, $45^{\circ}$ and $90^{\circ}$ compression.
+Point B, D and F represents the initial orientation of region 2 for $0^{\circ}$, $45^{\circ}$ and $90^{\circ}$ compression.}
+\end{figure}
+%
+% Table 5: divergence
+%	
+\begin{table}[!htb]
+\centering
+\caption{\label{table:div}Rotational velocity in Rodrigues' fundamental zone}
+\begin{tabular}{c c c c}
+\hline
+\,&\,&rotational velocity&divergence\\
+\hline
+\multirow{2}{1in}{$0^{\circ}$ compression}&region 1&$1.90\times 10^{-9}$&$9.53\times 10^{-2}$\\
+&region 2&$5.00\times 10^{-10}$&$7.94\times 10^{-2}$\\
+\multirow{2}{1in}{$45^{\circ}$ compression}&region 1&$3.01\times 10^{-2}$&$-7.76\times 10^{-2}$\\
+&region 2&$2.21\times 10^{-2}$&$-1.15\times 10^{-1}$\\
+\multirow{2}{1in}{$90^{\circ}$ compression}&region 1&$9.96\times 10^{-8}$&$-4.16\times 10^{-1}$\\
+&region 2&$2.13\times 10^{-3}$&$4.11\times 10^{-1}$\\
+\hline
+\end{tabular}
+\end{table}
+
+% Use Figure 13 (a) and (b) to illustrate the stability
+% Figure \ref{fig:13} (a) shows the compression direction with respect to lattice orientation for $0^{\circ}$ (axial) compression and the two major active prismatic slip systems.
+% The angles $\phi$ and $\lambda$, respectively $60^{\circ}$ and $30^{\circ}$, are measured from the load axis to the slip plane normal and slip direction, respectively.
+% During the loading, two prismatic slip systems are most activated.
+% Due to surrounding material constraint, the slip plane normal will rotate towards the compression direction.
+% Because the stress state across the MTR is not entirely uniform, these two slip systems are not equally activated in general.
+% As the more active one rotates its normal toward the compression direction, its Schmid factor $\left( \cos \phi \cos \lambda \right)$ increases and accelerates slip while the other system's Schmid factor as well as resolved shear stress decreases.
+% Thus, large rotation occurs that greatly depends on the local stress state.
+% In contrast, for $90^{\circ}$ (radial) compression in Figure \ref{fig:13} (b), the slip plane of the more activated slip system rotates such that its Schmid factor decreases.
+% Therefore, the resolved shear stress on this primary slip system reduces while the secondary system increases, leading to a zero net lattice rotation.
+
+% Use Figure 13 (c), (d) and Table 5 to quantitatively explain the observed breakdown in previous section
+The magnitude and divergence of the reorientation velocity field is shown in Figure \ref{fig:13}.
+The magnitude field represents the lattice reorientation velocity, while the divergence field reflects the stability of the initial orientation under fixed compression direction.
+A positive divergence indicates the possibility of increasing disorientation under compression, while negative divergence leads to decreasing disorientation.
+The reorientation velocity and divergence are influenced by both the $c/a$ ratio and the CRSS of each slip system.
+The values corresponding to the initial orientations shown in Figure \ref{fig:2simu} are then extracted and shown in Table \ref{table:div}.
+Generally, the reorientation velocity magnitude field does not correlate with the divergence field, indicating that the reorientation stability is not determined by the magnitude of reorientation velocity alone.
+
+% 0 compression
+When the compression direction is parallel to the billet axis (axial compression case), the MTRs with stable orientations are compressed along $[10\bar{1}0]$ direction.
+Then, the average rotational velocity is almost 0 and the divergence of rotational velocity (point A, B for region 1 and 2 in Figure \ref{fig:13}) is positive according to the Taylor model prediction.
+This means that both regions are in a metastable initial orientation where small perturbation from this balanced position will increase rotational velocity significantly.
+This is consistent with the orientation deviation of each element with respect to the mean orientation after compression as shown in Figure \ref{fig:11} and Figure \ref{fig:12}, where orientation dispersion is obvious.
+Also, the equivalent plastic strain in both regions ($\sim 0.60$) is about 20 \% larger than macroscopic true strain in Figure \ref{fig:5}, which further increases the disorientation.
+
+% 45 compression
+For the $45^{\circ}$ compression case, the divergence of reorientation velocity field is negative (point C, D for region 1 and 2 in Figure \ref{fig:13}), even though the rotational velocity is relatively large.
+The Taylor model is also consistent with Figure \ref{fig:11} and Figure \ref{fig:12}, where orientation deviation with respect to the mean orientation after compression is negligible.
+This happens when one single slip system, either basal or prismatic, is activated, or the accumulated shear strain of two slip systems are equal and homogeneously distributed within the MTR (Figure \ref{fig:5}(b)).
+Therefore, the entire region rotates as a unit towards one direction with limited orientation dispersion.
+
+% 90 compression
+When the compression direction is $90^{\circ}$ to the billet axis, the behavior of lattice rotation is quite different.
+In region 1 where this compression direction is along $[11\bar{2}0]$ direction, the rotational velocity is relatively small and the divergence is negative (point E in Figure \ref{fig:13}), even though two slip systems are activated (Figure \ref{fig:5}).
+Figure \ref{fig:11} and Figure \ref{fig:12} also exhibit similar trends for region 1 where the orientation deviation is negligible.
+In region 2, the average rotational velocity is relatively large and the divergence is positive (point F in Figure \ref{fig:13}), indicating that region 2 should be broken down efficiently.
+However, this large value is only true for the Taylor model where the equal strain assumption is adopted and greatly exceeds the CPFE computed response in Figure \ref{fig:11} and Figure \ref{fig:12}.
+In fact, the compression direction is perpendicular to the basal plane in this region, and only pyramidal slip systems are activated (see Figure \ref{fig:5}).
+The actual equivalent plastic strain in region 2 is only about 40 \% of the average equivalent plastic strain in region 1 (Figure \ref{fig:4}).
+Therefore, the lattice rotational velocity is much smaller compared with the Taylor model prediction but nonetheless shows dispersion.
+The divergence of the reorientation velocity field computed from the Taylor model is only an indicator of the breakdown efficiency, the quantification of which also depends on the amount of plastic strain in the local vicinity of the material.
+\subsection{Major assumptions and future work}
+Although the strain softening behavior for compression at 1172 K is comparable between the simulation and the experimental results in \cite{r26}, our investigation is based on several assumptions that future research should revisit.
+First, our simulations assume that evolution of texture component is controlled by slip-based deformation of $\alpha_p$ particles.
+Actually, the $\beta$ transus temperature of Ti-6242 is $1268\pm15$ K, and the volume fraction of $\alpha_p$ particles is about 75 \% at 1172 K (\cite{r26}).
+Since the texture component of the matrix is well captured and we are focused more on the interaction of $\alpha_p$ particles, adopting only $\alpha$ phase in the simulation appears to be justified.
+A similar assumption is adopted for the MTS model based simulation of Ti-5553 (near $\beta$) compression at elevated temperature (\cite{r17}), where $\alpha$ phase substitutes about 30 \% of $\beta$ matrix at 1073 K and only BCC $\beta$ phase is considered.
+It becomes increasingly important to account for the $\beta$ phase as the deformation temperature increases, particularly when individual alpha particles are entirely surrounded by $\beta$ matrix.
+Hence, the differences in flow stress and rate sensitivity can play an important role on strain partitioning between the constituent phases.
+
+Notwithstanding the axial compression case, the extent of MTR breakdown in the simulation is less than the experimental result in \cite{r14}.
+One possible explanation is that the initial slip resistance of each slip system is not well defined by existing test data, and differential latent hardening is not considered in the model, i.e. $q_{ij}$ equals 1.
+The relative slip resistance for basal, prismatic and first order pyramidal is held fixed at 1:0.67:3.0 according to the critical resolved shear stress measured at 1088-1228 K in \cite{r27}, which is for Ti-6Al-4V.
+Accurate calibration of the relative resistance can help to further optimize the study of compression direction on breakdown efficiency (\cite{r13}).
+Another limitation is that the current microstructure model neglects the initial orientation distribution within each MTR.
+Further simulations are needed to determine the sensitivity of this distribution on the MTR response.
+Also, the maximum true strain reached by the simulations is -0.51 due to convergence issues caused by mesh distortion within the Lagrangian formulation.
+Larger compressive strain could be applied if an adaptive remeshing technique is employed. 
+
+In summary, the current research provides useful information on the simulation of Ti-6242 $\alpha / \beta$ processing and the influence of compression direction on the MTR breakdown process.
+Plastic strain distribution, slip system activity and lattice rotation within each microtextured region depend significantly on compression direction.
+Realistic $\alpha_p$ particle geometry with MTRs accounting for misorientation distribution will be employed in future work to explore in greater detail the breakdown of MTRs in Ti-6242 during primary processing.
+%
+\section{Conclusion}
+\label{conclusion}
+For the first time, crystal plasticity finite element modeling was employed to investigate the influence of compression direction on MTR breakdown efficiency during primary processing.
+The major conclusions are summarized as follows:
+\begin{enumerate}
+\item The extended crystal plasticity constitutive model captures the strain softening behavior of Ti-6242 at 1172 K observed in hot-compression experiments.
+\item To account for plastic anisotropy and unequal slip resistance, an implicit stress update algorithm based on Green-Naghdi stress rate is extended.
+This algorithm provides a general framework for conveniently implementing models with multi-hardening variables, using isolated model-dependent terms.
+% \item For similar computational cost and mesh resolution, voxelated hexahedral element and conforming quadratic tetrahedral element meshes provide similar results.
+% At MTR boundaries and interfaces where stress concentrations occur, the voxelated hexahedral meshes typically produce more extreme local stress and strain;
+\item Compression direction has a significant influence on the plastic strain distribution, slip system activity and lattice rotation within MTRs.
+The pole figures obtained from CPFE simulations are qualitatively consistent with the EBSD measurement of evolved texture of samples from an extruded Ti6242 billet.
+\item For $0^{\circ}$ (axial) compression, disorientation within MTRs is obvious but $c$-axis still remains aligned.
+For $45^{\circ}$ compression, lattice rotation occurs but all $\alpha$ particles co-rotate such that MTRs remain stable.
+For $90^{\circ}$ (radial) compression, the $(0001)$ texture component is most scattered when the basal plane is perpendicular to external load, but the efficiency is limited by its high slip resistance.
+These conclusions are consistent with the analyses based on the reorientation velocity and divergence in Rodrigues' space, where uniform strain assumption is applied.
+\end{enumerate}
+\section{Acknowledgements}
+T. Truster was supported by a summer faculty fellowship through the Air Force Office of Scientific Research. This support is gratefully acknowledged.
+\section*{References}
+
+\bibliography{Ti6242_citation}
+
+\end{document}
